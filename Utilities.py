@@ -15,6 +15,44 @@ color_tuple = (white,black,blue,green,red,magenta,yellow)
 color_dict = {'white':white,'black':black,'blue':blue,'green':green,
               'red':red,'magenta':magenta,'yellow':yellow}
 
+EXTENSION_DELIMETER = '.'
+
+def name_ext(f):
+    if not EXTENSION_DELIMETER in f:
+        return (None, None)
+    else:
+        si = f.find(EXTENSION_DELIMETER)
+        return (f[:si], f[si+1:])
+    
+# function to retrieve all the file paths in a directory
+#     rootDirectory - absolute
+def getFilenames(rootDirectory, fileExtensions=None, returnRelativePaths=True):
+    root_path = os.path.abspath(rootDirectory)
+    exts = fileExtensions if fileExtensions else None
+    return _list_paths(root_path, exts)
+    
+
+    
+def _list_paths(root_dir, extensions):
+    file_paths = []
+    directory_paths = []
+    for i in [os.path.join(root_dir, x) for x in os.listdir(root_dir)]:
+        if os.path.isfile(i):
+            (name, ext) = name_ext(i)
+            if name and ((not extensions) or (ext in extensions)):
+                #print 'adding %s to files' % i
+                file_paths.append(os.path.join(root_dir, i))
+        elif os.path.isdir(i):
+            #print 'adding %s to dirs' % i
+            directory_paths.append(os.path.join(root_dir, i))
+    subdir_files = filter(lambda x: x, map(lambda y: _list_paths(y, extensions), directory_paths))
+    #print subdir_files
+    for fls in subdir_files:
+        for f in fls:
+            file_paths.append(f)
+    return file_paths
+    
+
 def findIndices(value, qlist):
     """IN:Value,Iterable. OUT:The indicies of all occurences
     of value in qlist."""
@@ -79,7 +117,12 @@ def loadSound(name):
     return sound
 
 
-
+#def main():
+#    root_directory = '/Users/michaelsobczak54/Documents/workspace/CTAT_STUFF/Examples/flash/FractionAddition/CognitiveTutorProblems'
+#    my_ext = ['wme', 'pr']
+#    print '\n'.join([str(x) for x in getFilenames(root_directory, my_ext)])
+#    
+#main()
 
 
 
