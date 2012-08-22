@@ -1,5 +1,6 @@
 import pygame,os
 from pygame.locals import *
+import functools
 
 # constants
 white = (255,255,255)
@@ -15,6 +16,17 @@ color_tuple = (white,black,blue,green,red,magenta,yellow)
 color_dict = {'white':white,'black':black,'blue':blue,'green':green,
               'red':red,'magenta':magenta,'yellow':yellow}
 
+# memoizer decorator
+def memoize(obj):
+    cache = obj.cache = {}
+    @functools.wraps(obj)
+    def memoizer(*args, **kwargs):
+        if args not in cache:
+            cache[args] = obj(*args, **kwargs)
+        return cache[args]
+    return memoizer
+
+
 EXTENSION_DELIMETER = '.'
 
 def name_ext(f):
@@ -24,15 +36,6 @@ def name_ext(f):
         si = f.find(EXTENSION_DELIMETER)
         return (f[:si], f[si+1:])
     
-# function to retrieve all the file paths in a directory
-#     rootDirectory - absolute
-def getFilenames(rootDirectory, fileExtensions=None, returnRelativePaths=True):
-    root_path = os.path.abspath(rootDirectory)
-    exts = fileExtensions if fileExtensions else None
-    return _list_paths(root_path, exts)
-    
-
-    
 def _list_paths(root_dir, extensions):
     file_paths = []
     directory_paths = []
@@ -40,19 +43,26 @@ def _list_paths(root_dir, extensions):
         if os.path.isfile(i):
             (name, ext) = name_ext(i)
             if name and ((not extensions) or (ext in extensions)):
-                #print 'adding %s to files' % i
+                #p rint 'adding %s to files' % i
                 file_paths.append(os.path.join(root_dir, i))
         elif os.path.isdir(i):
             #print 'adding %s to dirs' % i
             directory_paths.append(os.path.join(root_dir, i))
     subdir_files = filter(lambda x: x, map(lambda y: _list_paths(y, extensions), directory_paths))
-    #print subdir_files
+    # print subdir_files
     for fls in subdir_files:
         for f in fls:
             file_paths.append(f)
     return file_paths
     
-
+def getFilenames(rootDirectory, fileExtensions=None, returnRelativePaths=True):
+    """IN: Str rootDirectory, optional list of strings containing the desired file extensions,
+    optional boolean. Returns a list containing the absolute paths of all files of the passed
+    in extensions from the passed in directory."""
+    root_path = os.path.abspath(rootDirectory)
+    exts = fileExtensions if fileExtensions else None
+    return _list_paths(root_path, exts)
+       
 def findIndices(value, qlist):
     """IN:Value,Iterable. OUT:The indicies of all occurences
     of value in qlist."""
@@ -78,11 +88,12 @@ def testShell():
     is triggered. Place a call to testShell() in your game/update loop."""        
     for event in pygame.event.get():            
         if event.type == pygame.QUIT:
-            #exits pygame
+            # exits pygame
             pygame.quit()
-            #terminates all active threads
+            # terminates all active threads
             os._exit(1)
             
+@memoize            
 def loadImage(name, colorKey = None):
     """IN: String, optional Int. OUT: Pygame surface.
     Loads an image file of the passed
@@ -91,9 +102,8 @@ def loadImage(name, colorKey = None):
     is -1, the top left pixel will be
     used for transparency purposes."""
         
-    fullName = os.path.join('data',name)
     try:
-        image = pygame.image.load(fullName)
+        image = pygame.image.load(name)
     except pygame.error, message:
         print 'Cannot load image:',name
         raise SystemExit,message
@@ -123,10 +133,6 @@ def loadSound(name):
 #    print '\n'.join([str(x) for x in getFilenames(root_directory, my_ext)])
 #    
 #main()
-
-
-
-
 
 
 
