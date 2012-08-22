@@ -26,7 +26,6 @@ def memoize(obj):
         return cache[args]
     return memoizer
 
-
 EXTENSION_DELIMETER = '.'
 
 def name_ext(f):
@@ -125,15 +124,3 @@ def loadSound(name):
         print 'Cannot load sound:', name
         raise SystemExit, message
     return sound
-
-
-#def main():
-#    root_directory = '/Users/michaelsobczak54/Documents/workspace/CTAT_STUFF/Examples/flash/FractionAddition/CognitiveTutorProblems'
-#    my_ext = ['wme', 'pr']
-#    print '\n'.join([str(x) for x in getFilenames(root_directory, my_ext)])
-#    
-#main()
-
-
-
-    
