@@ -1,5 +1,6 @@
 import pygame,os
 from pygame.locals import *
+import functools
 
 # constants
 white = (255,255,255)
@@ -14,6 +15,17 @@ color_list = [white,black,blue,green,red,magenta,yellow]
 color_tuple = (white,black,blue,green,red,magenta,yellow)
 color_dict = {'white':white,'black':black,'blue':blue,'green':green,
               'red':red,'magenta':magenta,'yellow':yellow}
+
+# memoizer decorator
+def memoize(obj):
+    cache = obj.cache = {}
+    @functools.wraps(obj)
+    def memoizer(*args, **kwargs):
+        if args not in cache:
+            cache[args] = obj(*args, **kwargs)
+        return cache[args]
+    return memoizer
+
 
 EXTENSION_DELIMETER = '.'
 
@@ -123,10 +135,6 @@ def loadSound(name):
 #    print '\n'.join([str(x) for x in getFilenames(root_directory, my_ext)])
 #    
 #main()
-
-
-
-
 
 
 
